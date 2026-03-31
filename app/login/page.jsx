@@ -58,7 +58,7 @@ export default function Login() {
         zIndex: -2 
       }}>
         <Image 
-          src="https://images.unsplash.com/photo-1542314831-c6a4d14d8c53?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
+          src="/images/hero.png"
           alt="Hotel Background"
           fill
           style={{ objectFit: 'cover' }}
