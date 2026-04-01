@@ -4,38 +4,56 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 
-export default function Login() {
+export default function Register() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleLogin = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
+    // Validations
+    if (!name || !email || !password || !confirmPassword) {
+      setError('Todos los campos son requeridos');
+      setLoading(false);
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError('Las contraseñas no coinciden');
+      setLoading(false);
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres');
+      setLoading(false);
+      return;
+    }
+
     try {
-      const res = await fetch('/api/auth', {
+      const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ name, email, password }),
       });
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to login');
+        throw new Error(data.error || 'Error al registrarse');
       }
 
       // Save user in local storage to simulate session persistence
       localStorage.setItem('nova_user', JSON.stringify(data.user));
 
-      if (data.user.role === 'admin') {
-        router.push('/admin');
-      } else {
-        router.push('/dashboard');
-      }
+      // Redirect to dashboard
+      router.push('/dashboard');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -76,7 +94,7 @@ export default function Login() {
         zIndex: -1 
       }}></div>
 
-      {/* Glassmorphism Login Card */}
+      {/* Glassmorphism Register Card */}
       <div className="animate-zoom-in" style={{ 
         width: '100%', 
         maxWidth: '440px', 
@@ -93,10 +111,10 @@ export default function Login() {
         </div>
         
         <h1 style={{ fontSize: '1.8rem', marginBottom: '8px', textAlign: 'center', fontWeight: '700' }}>
-          ¡Bienvenido!
+          Crear Cuenta
         </h1>
         <p style={{ color: 'var(--text-muted)', marginBottom: '36px', textAlign: 'center', fontSize: '1.05rem' }}>
-          Nos alegra verte de nuevo. Ingresa para continuar.
+          Únete a nosotros y disfruta de mejores experiencias.
         </p>
 
         {error && (
@@ -110,7 +128,25 @@ export default function Login() {
           </div>
         )}
 
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleRegister}>
+          <div className="form-group" style={{ marginBottom: '24px' }}>
+            <label className="form-label" style={{ fontSize: '0.95rem', marginLeft: '4px' }}>Nombre Completo</label>
+            <input 
+              type="text" 
+              className="form-input" 
+              placeholder="Tu nombre"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              style={{
+                background: '#f8f9fa',
+                border: '1px solid transparent',
+                borderRadius: '12px',
+                padding: '16px',
+              }}
+            />
+          </div>
+
           <div className="form-group" style={{ marginBottom: '24px' }}>
             <label className="form-label" style={{ fontSize: '0.95rem', marginLeft: '4px' }}>Correo Electrónico</label>
             <input 
@@ -128,7 +164,8 @@ export default function Login() {
               }}
             />
           </div>
-          <div className="form-group" style={{ marginBottom: '32px' }}>
+
+          <div className="form-group" style={{ marginBottom: '24px' }}>
             <label className="form-label" style={{ fontSize: '0.95rem', marginLeft: '4px' }}>Contraseña</label>
             <input 
               type="password" 
@@ -145,6 +182,25 @@ export default function Login() {
               }}
             />
           </div>
+
+          <div className="form-group" style={{ marginBottom: '32px' }}>
+            <label className="form-label" style={{ fontSize: '0.95rem', marginLeft: '4px' }}>Confirmar Contraseña</label>
+            <input 
+              type="password" 
+              className="form-input" 
+              placeholder="••••••••"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              style={{
+                background: '#f8f9fa',
+                border: '1px solid transparent',
+                borderRadius: '12px',
+                padding: '16px',
+              }}
+            />
+          </div>
+
           <button 
             type="submit" 
             className="btn btn-primary pulse-button" 
@@ -159,20 +215,17 @@ export default function Login() {
             }} 
             disabled={loading}
           >
-            {loading ? 'Ingresando...' : 'Iniciar Sesión'}
+            {loading ? 'Registrando...' : 'Registrarse'}
           </button>
         </form>
         
         <div style={{ marginTop: '30px', textAlign: 'center', fontSize: '0.9rem', color: '#777' }}>
           <p style={{ marginBottom: '8px' }}>
-            ¿Aún no tienes cuenta? 
-            <Link href="/register" style={{ color: 'var(--text-main)', fontWeight: '700', textDecoration: 'none', marginLeft: '4px' }}>
-              Regístrate aquí
+            ¿Ya tienes cuenta? 
+            <Link href="/login" style={{ color: 'var(--text-main)', fontWeight: '700', textDecoration: 'none', marginLeft: '4px' }}>
+              Inicia Sesión
             </Link>
           </p>
-          <div style={{ height: '1px', background: '#eee', margin: '20px 0' }}></div>
-          <p>¿Administrador? Usa <b>admin@novalima.com</b></p>
-          <p>y contraseña <b>admin123</b></p>
         </div>
       </div>
     </div>
